@@ -9,7 +9,7 @@ spec:
   project: retail-store
   source:
     repoURL: https://github.com/raghuananth4558/retail-store-app.git
-    targetRevision: main
+    targetRevision: gitops
     path: src/orders/chart
     helm:
       valueFiles:
