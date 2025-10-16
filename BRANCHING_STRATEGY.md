@@ -245,7 +245,7 @@ Production branch: Use individual applications only
 ### **Image Pull Errors**
 ```yaml
 # Problem: Wrong ECR repository or missing images
-Error: Failed to pull image "123456789012.dkr.ecr.us-west-2.amazonaws.com/retail-store-ui:abc1234"
+Error: Failed to pull image "123456789012.dkr.ecr.us-east-1.amazonaws.com/retail-store-ui:abc1234"
 
 # Solutions:
 1. Check ECR repository exists (workflow creates automatically)
