@@ -345,6 +345,9 @@ GitHub Actions will automatically build and push the updated Docker images to Am
 
 # Check the ECR repository for the pushed images
 ![image](docs/images/o15.png)
+#
+#
+
 
 
 ### Verify Deployment
