@@ -1,16 +1,8 @@
 # Retail Store Sample App - GitOps with Amazon EKS Auto Mode
  
 ![Banner](./docs/images/banner.png)
- 
-<div align="center">
-  <div align="center">
+#
 
-[![Stars](https://img.shields.io/github/stars/LondheShubham153/retail-store-sample-app)](Stars)
-![GitHub License](https://img.shields.io/github/license/LondheShubham153/retail-store-sample-app?color=green)
-![Dynamic JSON Badge](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%LondheShubham153%2Fretail-store-sample-app%2Frefs%2Fheads%2Fmain%2F.release-please-manifest.json&query=%24%5B%22.%22%5D&label=release)
-
-
-  </div>
 
   <strong>
   <h2>AWS Containers Retail Sample</h2>
@@ -45,6 +37,7 @@ The Retail Store Sample App demonstrates a modern microservices architecture dep
 - **Cart Service**: Java-based shopping cart API
 - **Orders Service**: Java-based order management API
 - **Checkout Service**: Node.js-based checkout orchestration API
+- **Caching Service**: Redis
 
 
 ## Application Architecture
@@ -78,11 +71,11 @@ The Infrastructure Architecture follows cloud-native best practices:
 
 ## Quick Start
 
-**Want to deploy immediately?** Follow these steps for a basic deployment:
+**For a Quick deployment** Follow these steps for a basic deployment:
 
 1. **Install Prerequisites**: AWS CLI, Terraform, kubectl, Docker, Helm
 2. **Configure AWS**: `aws configure` with appropriate credentials
-3. **Clone Repository**: `git clone https://github.com/LondheShubham153/retail-store-sample-app.git`
+3. **Clone Repository**: `git clone https://github.com/raghuananth4558/retail-store-app.git`
 4. **Deploy Infrastructure**: Run Terraform in two phases (see [Getting Started](#getting-started))
 5. **Access Application**: Get load balancer URL and browse the retail store
 
@@ -114,7 +107,7 @@ This repository uses a **dual-branch approach** for different deployment scenari
 
 1. **Install Prerequisites**: AWS CLI, Terraform, kubectl, Docker, Helm
 2. **Configure AWS**: `aws configure` with appropriate credentials
-3. **Clone Repository**: `git clone https://github.com/LondheShubham153/retail-store-sample-app.git`
+3. **Clone Repository**: `git clone https://github.com/raghuananth4558/retail-store-app.git`
 4. **Deploy Infrastructure**: Run Terraform in two phases (see [Getting Started](#getting-started))
 5. **Access Application**: Get load balancer URL and browse the retail store
 
@@ -177,18 +170,31 @@ helm version
 ## Follow these steps to deploy the application:
 
 ### Step 1. Configure AWS with **`Root User`** Credentials:
+#
+
+### Create an Access key
+![image](docs/images/a01.png)
+#
 
   Ensure your AWS CLI is configured with the **Root user credentials:**
 
 ```sh
 aws configure
 ```
+### Aws configured and installed all the prerequisites 
+![image](docs/images/b02.png)
+#
 
 ### Step 2. Clone the Repository:
 
 ```sh
-git clone https://github.com/LondheShubham153/retail-store-sample-app.git
+git https://github.com/raghuananth4558/retail-store-app.git
 ```
+#
+
+### Add timeout = 600 in argocd.tf in terraform folder
+![image](docs/images/c03.png)
+#
 
 > [!IMPORTANT]
 > ### Step 3: Choose Your Deployment Strategy
@@ -207,13 +213,47 @@ git clone https://github.com/LondheShubham153/retail-store-sample-app.git
 
 ### Step 4. Deploy Infrastructure with Terraform:
 
+> [!IMPORTANT]
+> ### Before applying terraform apply to the entire code, we need to create vpc and eks cluster and then map these two with our remaining resources
+>
+ ```sh
+ cd terraform
+ terraform init
+ terraform apply --target=module.vpc
+ ```
+ ### terraform init
+ ![image](docs/images/d04.png)
+ #
+
+ ### Creating a vpc
+ ![image](docs/images/e05.png)
+ #
+
+ ### Verify if the vpc is created in our aws console
+ ![image](docs/images/e06.png)
+ #
+
+### Now we will create an eks cluster
 ```sh
-cd retail-store-sample-app/terraform/
-terraform init
+terraform apply --target=module.retail_app_eks
+```
+### Creating an eks cluster 
+![image](docs/images/f06.png)
+
+### Eks cluster created
+![image](docs/images/f07.png)
+
+### Verify the eks cluster in aws console
+![image](docs/images/f08.png)
+#
+
+### Now we can apply terraform to our remaining resources
+
+```sh
 terraform apply --auto-approve
 ```
-
-<img width="1205" height="292" alt="image" src="https://github.com/user-attachments/assets/6f1e407e-4a4e-4a4c-9bdf-0c9b89681368" />
+![image](docs/images/h08.png)
+#
 
 This creates the core infrastructure, including:
 - VPC with public and private subnets
@@ -225,11 +265,19 @@ And deploys:
 - NGINX Ingress Controller
 - Cert Manager for SSL certificates
 
+### The core infrastructure is created
+![image](docs/images/i09.png)
+#
+
 
 ### Step 5: Update kubeconfig to Access the Amazon EKS Cluster:
 ```
 aws eks update-kubeconfig --name retail-store --region <region>
 ```
+### Kubeconfig update
+![image](docs/images/g07.png)
+#
+
 
 > Application is live with Public image:
 
@@ -241,13 +289,21 @@ aws eks update-kubeconfig --name retail-store --region <region>
 > [!NOTE]
 > Let's move forward with GitOps principle utilising Amazon private registry to create private registry and store images.
 
-### Step 6: GitHub Actions (Production Branch Only)
+### Step 6: GitHub Actions (Production branch)
 
 > **Note**: This step is only required if you're using the **Production branch** for automated deployments. Skip this step if using the **Public Application branch** for simple deployment.
 
 For GitHub Actions, first configure secrets so the pipelines can be automatically triggered:
 
 **Create an IAM User, policies, and generate credentials**
+
+### IAM user git-ops admin created
+![image](docs/images/L12.png)
+#
+
+### Access key generated for the IAM user
+![image](docs/images/L13.png)
+#
 
 **Go to your GitHub repo → Settings → Secrets and variables → Actions → New repository secret.**
 
@@ -259,16 +315,39 @@ For GitHub Actions, first configure secrets so the pipelines can be automaticall
 | `AWS_REGION`          | `region-name`                       |
 | `AWS_ACCOUNT_ID`        | `your-account-id` |
 
+### Adding a new secret AWS_REGION
+![image](docs/images/L14.png)
+#
+
+### All the 4 secrets are added in the github
+![image](docs/images/L15.png)
+#
+
 
 
 > [!IMPORTANT]
 > Once the entire cluster is created, any changes pushed to the repository will automatically trigger GitHub Actions.
 
+### Few changes made in the src folder
+![image](docs/images/m13.png)
+#
+
 GitHub Actions will automatically build and push the updated Docker images to Amazon ECR.
 
+![image](docs/images/m14.png)
+#
 
+![image](docs/images/n15.png)
+#
 
-<img width="2868" height="1130" alt="image" src="https://github.com/user-attachments/assets/f29c3416-d630-4463-81d2-aaa8af9a02da" />
+![image](docs/images/n16.png)
+#
+
+# Check the ECR repository for the pushed images
+![image](docs/images/o15.png)
+#
+#
+
 
 
 ### Verify Deployment
@@ -278,6 +357,17 @@ Check if the nodes are running:
 ```bash
 kubectl get nodes
 ```
+#
+
+Check if all the pods are running
+
+```bash
+kubectl gets pods -A
+```
+
+### All the pods are running
+![image](docs/images/i10.png)
+#
 
 ### Step 7: Access the Application:
 
@@ -286,10 +376,26 @@ The application is exposed through the NGINX Ingress Controller. Get the load ba
 ```bash
 kubectl get svc -n ingress-nginx
 ```
+![image](docs/images/i11.png)
+#
 
 Use the EXTERNAL-IP of the ingress-nginx-controller service to access the application.
 
-<img width="2912" height="1756" alt="image" src="https://github.com/user-attachments/assets/095077d6-d3cb-48f6-b021-e977db5fb242" />
+![image](docs/images/j10.png)
+#
+
+### Test the application by placing an order
+![image](docs/images/j11.png)
+
+![image](docs/images/j12.png)
+
+![image](docs/images/j13.png)
+
+![image](docs/images/j14.png)
+
+![image](docs/images/j15.png)
+#
+
 
 ### Step 8: Argo CD Automated Deployment:
 
@@ -298,22 +404,33 @@ Use the EXTERNAL-IP of the ingress-nginx-controller service to access the applic
 ```
 kubectl get pods -n argocd
 ```
-
+![image](docs/images/k11.png)
+#
 
 ### Step 9: Port-forward to Argo CD UI and login:
+#
 
-**Get ArgoCD admin password**
-```
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d
-```
 
 **Port-forward to Argo CD UI**
 ```
 kubectl port-forward svc/argocd-server -n argocd 8080:443 &
 ```
+![image](docs/images/k12.png)
+#
+
+**Get ArgoCD admin password**
+```
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d
+```
+![image](docs/images/k14.png)
+#
+
 
 Open your browser and navigate to:
 https://localhost:8080
+### ArgoCD accessed
+![image](docs/images/k13.png)
+#
 
 Username: admin 
 
@@ -323,7 +440,8 @@ Password: <output of previous command>
 
 Once ArgoCD is deployed, you can access the web interface:
 
-![ArgoCD UI Dashboard](./docs/images/argocd-ui.png)
+![image](docs/images/k15.png)
+#
 
 The ArgoCD UI provides:
 - **Application Status**: Real-time sync status of all services
@@ -344,7 +462,9 @@ To delete all resources created by Terraform:
 terraform destroy --auto-approve
 ```
 
-<img width="1139" height="439" alt="image" src="https://github.com/user-attachments/assets/5258761a-01c4-49d0-b6f3-997fc10a9f35" />
+![image](docs/images/p16.png)
+#
+
 
 > [!NOTE]
 > ECR Repositories you need to Delete it from AWS Console Manually.
@@ -357,7 +477,7 @@ terraform destroy --auto-approve
 
 #### **Image Pull Errors**
 ```
-Error: Failed to pull image "123456789012.dkr.ecr.us-west-2.amazonaws.com/retail-store-ui:abc1234"
+Error: Failed to pull image "123456789012.dkr.ecr.us-east-1.amazonaws.com/retail-store-ui:abc1234"
 ```
 **Solutions**:
 1. Ensure you're using the correct branch for your deployment strategy
@@ -379,20 +499,11 @@ Error: Failed to pull image "123456789012.dkr.ecr.us-west-2.amazonaws.com/retail
 - **Infrastructure issues**: Review Terraform logs
 - **Application issues**: Check ArgoCD UI and kubectl logs
 
-## License
 
-This project is licensed under the Apache License 2.0 - see the [LICENSE](./LICENSE) file for details.
-
-## Support
-
-- **Issues**: [GitHub Issues](https://github.com/LondheShubham153/retail-store-sample-app/issues)
-- **Discord**: [TrainWithShubhamCommunity](https://discord.gg/kGEr9mR5gT)
 
 ---
 
 <div align="center">
-
-**⭐ Star this repository if you found it helpful!**
 
 **🔄 For advanced GitOps workflows, see [BRANCHING_STRATEGY.md](./BRANCHING_STRATEGY.md)**
 
